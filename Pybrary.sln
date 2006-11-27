@@ -3,6 +3,8 @@ Microsoft Visual Studio Solution File, Format Version 9.00
 # Visual Studio 2005
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pybrary.Plot", "Pybrary.Plot\Pybrary.Plot.csproj", "{D3370796-382F-491A-928F-897C6D26A74F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pybrary.Plot.Demo", "Pybrary.Plot.Demo\Pybrary.Plot.Demo.csproj", "{AFDD29F1-DF07-470C-98AB-9D383401DA83}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -13,6 +15,10 @@ Global
 		{D3370796-382F-491A-928F-897C6D26A74F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D3370796-382F-491A-928F-897C6D26A74F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D3370796-382F-491A-928F-897C6D26A74F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AFDD29F1-DF07-470C-98AB-9D383401DA83}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AFDD29F1-DF07-470C-98AB-9D383401DA83}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AFDD29F1-DF07-470C-98AB-9D383401DA83}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AFDD29F1-DF07-470C-98AB-9D383401DA83}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

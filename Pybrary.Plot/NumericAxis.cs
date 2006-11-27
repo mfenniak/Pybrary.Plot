@@ -212,6 +212,19 @@ namespace Pybrary.Plot
             }
         }
 
+        public bool AutoscaleIncludesZero
+        {
+            get
+            {
+                return autoscaleIncludesZero;
+            }
+            set
+            {
+                autoscaleIncludesZero = value;
+                raiseEvent();
+            }
+        }
+
         public bool Visible
         {
             get
