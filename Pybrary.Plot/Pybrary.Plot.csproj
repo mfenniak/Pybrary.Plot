@@ -1,0 +1,100 @@
+﻿<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.50727</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{D3370796-382F-491A-928F-897C6D26A74F}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Trident.Plot</RootNamespace>
+    <AssemblyName>Trident.Plot</AssemblyName>
+    <StartupObject>Trident.Plot.Test.StartTestFormA</StartupObject>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="nunit.framework, Version=2.2.8.0, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77, processorArchitecture=MSIL" />
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="AdvancedRect.cs" />
+    <Compile Include="Annotation.cs" />
+    <Compile Include="AnnotationCollection.cs" />
+    <Compile Include="Axis.cs" />
+    <Compile Include="AxisCollection.cs" />
+    <Compile Include="BrushDescription.cs" />
+    <Compile Include="ColorFactory.cs" />
+    <Compile Include="DataBoundAnnotation.cs" />
+    <Compile Include="DataPointBoundAnnotation.cs" />
+    <Compile Include="Data\MultipointCollection.cs" />
+    <Compile Include="Data\PointCollection.cs" />
+    <Compile Include="EventObject.cs" />
+    <Compile Include="FontDescription.cs" />
+    <Compile Include="LegendEntry.cs" />
+    <Compile Include="ListEnumerator.cs" />
+    <Compile Include="ManualNumericAxisForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ManualNumericAxisForm.Designer.cs">
+      <DependentUpon>ManualNumericAxisForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Margins.cs" />
+    <Compile Include="DateTimeAxis.cs" />
+    <Compile Include="NumericAxis.cs" />
+    <Compile Include="PenDescription.cs" />
+    <Compile Include="Plot.cs" />
+    <Compile Include="PlotControl.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ScatterSeries.cs" />
+    <Compile Include="Series.cs" />
+    <Compile Include="SeriesCollection.cs" />
+    <Compile Include="StackedSeries.cs" />
+    <Compile Include="Symbol.cs" />
+    <Compile Include="SymbolDescription.cs" />
+    <Compile Include="TimespanAxis.cs" />
+    <Compile Include="XAxis.cs" />
+    <Compile Include="YAxis.cs" />
+    <Service Include="{94E38DFF-614B-4cbd-B67C-F211BB35CE8B}" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="ManualNumericAxisForm.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>ManualNumericAxisForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PlotControl.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>PlotControl.cs</DependentUpon>
+    </EmbeddedResource>
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
