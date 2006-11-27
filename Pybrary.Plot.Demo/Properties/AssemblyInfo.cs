@@ -8,9 +8,9 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTitle("Pybrary.Plot.Demo")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Rapid OppSource Inc")]
+[assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("Pybrary.Plot.Demo")]
-[assembly: AssemblyCopyright("Copyright © Rapid OppSource Inc 2006")]
+[assembly: AssemblyCopyright("Copyright © Mathieu Fenniak 2006")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

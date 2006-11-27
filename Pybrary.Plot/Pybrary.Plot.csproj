@@ -7,9 +7,8 @@
     <ProjectGuid>{D3370796-382F-491A-928F-897C6D26A74F}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Trident.Plot</RootNamespace>
-    <AssemblyName>Trident.Plot</AssemblyName>
-    <StartupObject>Trident.Plot.Test.StartTestFormA</StartupObject>
+    <RootNamespace>Pybrary.Plot</RootNamespace>
+    <AssemblyName>Pybrary.Plot</AssemblyName>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
