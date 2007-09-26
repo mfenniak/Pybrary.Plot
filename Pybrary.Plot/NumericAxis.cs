@@ -345,10 +345,18 @@ namespace Pybrary.Plot
 
         private double[] intervalSizes = new double[] {
             5e8, 2.5e8, 2e8, 1e8,
-            5e7, 2.5e7, 2e7, 1e7, 5e6, 2.5e6, 2e6, 1e6,
-            5e5, 2.5e5, 2e5, 1e5, 5e4, 2.5e4, 2e4, 1e4,
-            5e3, 2.5e3, 2e3, 1e3, 5e2, 2.5e2, 2e2, 1e2,
-            50, 25, 20, 10, 5, 2, 1, 0.5, 0.1, 0.05, 0.01
+            5e7, 2.5e7, 2e7, 1e7,
+            5e6, 2.5e6, 2e6, 1e6,
+            5e5, 2.5e5, 2e5, 1e5,
+            5e4, 2.5e4, 2e4, 1e4,
+            5e3, 2.5e3, 2e3, 1e3,
+            5e2, 2.5e2, 2e2, 1e2,
+            5e1, 2.5e1, 2e1, 1e1,
+            5e0, 2e0, 1e0,   // Drop 2.5 as a scale -- looks sillier than {2,4,6,8}
+            5e-1, 2e-1, 1e-1,
+            5e-2, 2e-2, 1e-2,
+            5e-3, 2e-3, 1e-3,
+            5e-4, 2e-4, 1e-4,
         };
 
         public double CalculateInterval(double min, double max, int maxIntervals, out int intervals)
