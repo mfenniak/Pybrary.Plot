@@ -21,10 +21,14 @@ namespace Pybrary.Plot
         private PenDescription minorTickPen = new PenDescription(Color.Black, 1f / 96);
 
         private Plot parent;
-        private bool horizontalMonthLabels = false;
-        private bool verticalMonthLabels = false;
-        private bool quarterLabels = false;
-        private bool dailyTicks = false;
+
+        private enum AxisType {
+            MonthsHorizontalWithDailyTicks,
+            MonthsHorizontal,
+            MonthsVertical,
+            Quarters
+        };
+        private AxisType axisType = AxisType.MonthsHorizontalWithDailyTicks;
 
         private GregorianCalendar cal = new GregorianCalendar();
 
@@ -37,12 +41,10 @@ namespace Pybrary.Plot
         {
             float height = 0;
 
-            dailyTicks = horizontalMonthLabels = verticalMonthLabels =
-                quarterLabels = false;
+            axisType = AxisType.MonthsHorizontalWithDailyTicks;
 
             using (Font f = labelFont.CreateFont())
             {
-                horizontalMonthLabels = true;
                 SizeF labelSize = g.MeasureString("Mar '05", f);
                 int numLabels = calculateNumLabels();
 
@@ -54,30 +56,29 @@ namespace Pybrary.Plot
 
                     // do we also have room for daily ticks?
                     int numDays = (ScaleMaximum - ScaleMinimum).Days;
-                    dailyTicks = (0.05f * numDays) < maximumWidth;
+                    if ((0.05f * numDays) < maximumWidth)
+                        axisType = AxisType.MonthsHorizontalWithDailyTicks;
+                    else
+                        axisType = AxisType.MonthsHorizontal;
                 }
                 else
                 {
                     // our total width is going to be too wide.  fallback #1 -
                     // vertically drawn labels
-                    horizontalMonthLabels = false;
-                    verticalMonthLabels = true;
 
                     estimatedWidth = (labelSize.Height + 0.3f) * numLabels;
                     if (estimatedWidth < maximumWidth)
                     {
                         // vertical labels will work fine.
+                        axisType = AxisType.MonthsVertical;
                         height += labelSize.Width;
                     }
                     else
                     {
-                        verticalMonthLabels = false;
-                        quarterLabels = true;
-
                         // still too wide - switch to "Q1 '04", "Q2 '04", ect.
+                        axisType = AxisType.Quarters;
                         labelSize = g.MeasureString("Q1 '05", f);
                         height += labelSize.Width;
-                        quarterLabels = true;
 
                         // future work - switch to just the year, then the decade
                         // if ever necessary
@@ -99,7 +100,7 @@ namespace Pybrary.Plot
             {
                 if (v > ScaleMaximum)
                     break;
-                v = cal.AddMonths(v, quarterLabels ? 3 : 1);
+                v = cal.AddMonths(v, (axisType == AxisType.Quarters) ? 3 : 1);
             }
             return i + 1;
         }
@@ -121,11 +122,11 @@ namespace Pybrary.Plot
                 float tick = tickLength;
                 float dayTick = minorTickLength;
                 DateTime v;
-                if (verticalMonthLabels || horizontalMonthLabels)
-                    v = new DateTime(ScaleMinimum.Year, ScaleMinimum.Month, 1);
-                else // quarterLabels
+                if (axisType == AxisType.Quarters)
                     // set v to beginning of quarter which ScaleMinimum is in
                     v = new DateTime(ScaleMinimum.Year, (((ScaleMinimum.Month - 1) / 3) * 3) + 1, 1);
+                else // monthly labels
+                    v = new DateTime(ScaleMinimum.Year, ScaleMinimum.Month, 1);
                 for (int i = 0; i < calculateNumLabels(); i++)
                 {
                     float x1 = DataToCoordinate(v, area);
@@ -134,7 +135,7 @@ namespace Pybrary.Plot
                     if (x1 > area.BottomRight.X)
                         break;
 
-                    DateTime v2 = cal.AddMonths(v, quarterLabels ? 3 : 1);
+                    DateTime v2 = cal.AddMonths(v, (axisType == AxisType.Quarters) ? 3 : 1);
                     float x2 = DataToCoordinate(v2, area);
                     x2 = Math.Min(x2, area.BottomRight.X);
 
@@ -142,7 +143,7 @@ namespace Pybrary.Plot
                     if (gridlinesEnabled && x1 > area.TopLeft.X && x1 < area.BottomRight.X)
                         g.DrawLine(pgrid, x1, plotArea.TopLeft.Y, x1, plotArea.BottomRight.Y);
 
-                    if (dailyTicks)
+                    if (axisType == AxisType.MonthsHorizontalWithDailyTicks)
                     {
                         int days = cal.GetDaysInMonth(v.Year, v.Month);
                         for (int d = 1; d <= days; d++)
@@ -152,7 +153,7 @@ namespace Pybrary.Plot
                                 g.DrawLine(pminor, xd, area.TopLeft.Y, xd, area.TopLeft.Y + dayTick);
                         }
                     }
-                    else if (quarterLabels)
+                    else if (axisType == AxisType.Quarters)
                     {
                         for (int d = 1; d < 3; d++)
                         {
@@ -163,14 +164,14 @@ namespace Pybrary.Plot
                     }
 
                     StringFormat form = new StringFormat();
-                    if (verticalMonthLabels || quarterLabels)
+                    if (axisType == AxisType.MonthsVertical || axisType == AxisType.Quarters)
                         form.FormatFlags = StringFormatFlags.DirectionVertical;
 
                     string txt;
-                    if (verticalMonthLabels || horizontalMonthLabels)
-                        txt = String.Format("{0:MMM \\'yy}", v);
-                    else
+                    if (axisType == AxisType.Quarters)
                         txt = String.Format("Q{0} {1:\\'yy}", (v.Month / 3) + 1, v);
+                    else
+                        txt = String.Format("{0:MMM \\'yy}", v);
 
                     SizeF sz = g.MeasureString(txt, f, 100, form);
                     g.DrawString(txt, f, br, ((x1 + x2) / 2) - (sz.Width / 2), area.TopLeft.Y + tick, form);
