@@ -101,7 +101,7 @@ namespace Pybrary.Plot
                     break;
                 v = cal.AddMonths(v, quarterLabels ? 3 : 1);
             }
-            return i;
+            return i + 1;
         }
 
         public void DrawX(Graphics g, AdvancedRect area, AdvancedRect plotArea)
@@ -131,12 +131,15 @@ namespace Pybrary.Plot
                     float x1 = DataToCoordinate(v, area);
                     x1 = Math.Max(x1, area.TopLeft.X);
 
+                    if (x1 > area.BottomRight.X)
+                        break;
+
                     DateTime v2 = cal.AddMonths(v, quarterLabels ? 3 : 1);
                     float x2 = DataToCoordinate(v2, area);
                     x2 = Math.Min(x2, area.BottomRight.X);
 
                     g.DrawLine(p, x1, area.TopLeft.Y, x1, area.TopLeft.Y + tick);
-                    if (gridlinesEnabled && x1 != area.TopLeft.X && x1 != area.BottomRight.X)
+                    if (gridlinesEnabled && x1 > area.TopLeft.X && x1 < area.BottomRight.X)
                         g.DrawLine(pgrid, x1, plotArea.TopLeft.Y, x1, plotArea.BottomRight.Y);
 
                     if (dailyTicks)
