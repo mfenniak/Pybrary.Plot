@@ -18,7 +18,7 @@ namespace Pybrary.Plot
         private PenDescription borderPen = new PenDescription(Color.Black, 1f / 96);
         private SeriesCollection series = new SeriesCollection();
         private bool displayLegend = false;
-        private PenDescription legendBorder = new PenDescription(Color.Black, 1f / 96);
+        //private PenDescription legendBorder = new PenDescription(Color.Black, 1f / 96);
         private AnnotationCollection annotations = new AnnotationCollection();
 
         private Margins outerMargins = new Margins(0.1f, 0.1f, 0.1f, 0.1f);
@@ -138,7 +138,7 @@ namespace Pybrary.Plot
                         g.DrawString(leftHeader, left_f, left_br, left_xLoc, left_yLoc);
                 }
             }
-            if (headerSize != null)
+            if (headerSize.Height != 0)
             {
                 area.TopLeft.Y += headerSize.Height;
                 area.TopLeft.Y += 0.1f;
