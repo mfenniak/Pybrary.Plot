@@ -276,7 +276,7 @@ namespace Pybrary.Plot
                 {
                     DateTime maxX = asDateTime(parent.Series.MaxX.Value);
                     // scale to the end of the month of maxX;
-                    return new DateTime(maxX.Year, maxX.Month, cal.GetDaysInMonth(maxX.Year, maxX.Month) + 1);
+                    return new DateTime(maxX.Year, maxX.Month, cal.GetDaysInMonth(maxX.Year, maxX.Month), 23, 59, 59);
                 }
                 return unscaledMaximum;
             }
