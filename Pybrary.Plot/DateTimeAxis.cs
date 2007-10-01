@@ -62,7 +62,7 @@ namespace Pybrary.Plot
                     // Check for whether hourly labels might fit
                     labelSize = g.MeasureString("12P", f2);
                     double numHours = (ScaleMaximum - ScaleMinimum).TotalHours;
-                    if (numHours * labelSize.Width < maximumWidth)
+                    if ((1.5 * numHours * labelSize.Width) < maximumWidth)
                     {
                         axisType = AxisType.DailyWithHourlyLabels;
                         height += 1f / 16;
