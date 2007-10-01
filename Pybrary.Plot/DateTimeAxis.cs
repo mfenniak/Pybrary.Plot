@@ -24,6 +24,7 @@ namespace Pybrary.Plot
         private Plot parent;
 
         private enum AxisType {
+            DailyWithHourlyTicks,
             MonthsHorizontalWithDailyLabels,
             MonthsHorizontalWithDailyTicks,
             MonthsHorizontal,
@@ -43,55 +44,70 @@ namespace Pybrary.Plot
         {
             float height = 0;
 
-            axisType = AxisType.MonthsHorizontalWithDailyLabels;
-
             using (Font f = labelFont.CreateFont())
             using (Font f2 = smallLabelFont.CreateFont())
             {
-                SizeF labelSize = g.MeasureString("Mar '05", f);
+                // Calculate number of days:
+                axisType = AxisType.DailyWithHourlyTicks;
                 int numLabels = calculateNumLabels();
 
+                SizeF labelSize = g.MeasureString("Mar 12 '05", f);
                 float estimatedWidth = (labelSize.Width + 0.3f) * numLabels;
                 if (estimatedWidth < maximumWidth)
                 {
-                    // monthly horizontal labels
+                    // Daily major labels.
                     height += labelSize.Height;
-
-                    SizeF dayLabelSize = g.MeasureString("30", f2);
-
-                    // do we also have room for daily ticks?
-                    int numDays = (ScaleMaximum - ScaleMinimum).Days;
-                    if (numDays * dayLabelSize.Width < maximumWidth)
-                    {
-                        axisType = AxisType.MonthsHorizontalWithDailyLabels;
-                        height += 1f / 16;
-                    }
-                    else if ((0.05f * numDays) < maximumWidth)
-                        axisType = AxisType.MonthsHorizontalWithDailyTicks;
-                    else
-                        axisType = AxisType.MonthsHorizontal;
+                    axisType = AxisType.DailyWithHourlyTicks;
                 }
                 else
                 {
-                    // our total width is going to be too wide.  fallback #1 -
-                    // vertically drawn labels
+                    // Calculate number of months:
+                    axisType = AxisType.MonthsHorizontalWithDailyLabels;
+                    numLabels = calculateNumLabels();
 
-                    estimatedWidth = (labelSize.Height + 0.3f) * numLabels;
+                    labelSize = g.MeasureString("Mar '05", f);
+                    estimatedWidth = (labelSize.Width + 0.3f) * numLabels;
                     if (estimatedWidth < maximumWidth)
                     {
-                        // vertical labels will work fine.
-                        axisType = AxisType.MonthsVertical;
-                        height += labelSize.Width;
+                        // monthly horizontal labels
+                        height += labelSize.Height;
+
+                        SizeF dayLabelSize = g.MeasureString("30", f2);
+
+                        // do we also have room for daily ticks?
+                        int numDays = (ScaleMaximum - ScaleMinimum).Days;
+                        if (numDays * dayLabelSize.Width < maximumWidth)
+                        {
+                            axisType = AxisType.MonthsHorizontalWithDailyLabels;
+                            height += 1f / 16;
+                        }
+                        else if ((0.05f * numDays) < maximumWidth)
+                            axisType = AxisType.MonthsHorizontalWithDailyTicks;
+                        else
+                            axisType = AxisType.MonthsHorizontal;
                     }
                     else
                     {
-                        // still too wide - switch to "Q1 '04", "Q2 '04", ect.
-                        axisType = AxisType.Quarters;
-                        labelSize = g.MeasureString("Q1 '05", f);
-                        height += labelSize.Width;
+                        // our total width is going to be too wide.  fallback #1 -
+                        // vertically drawn labels
 
-                        // future work - switch to just the year, then the decade
-                        // if ever necessary
+                        estimatedWidth = (labelSize.Height + 0.3f) * numLabels;
+                        if (estimatedWidth < maximumWidth)
+                        {
+                            // vertical labels will work fine.
+                            axisType = AxisType.MonthsVertical;
+                            height += labelSize.Width;
+                        }
+                        else
+                        {
+                            // still too wide - switch to "Q1 '04", "Q2 '04", ect.
+                            axisType = AxisType.Quarters;
+                            labelSize = g.MeasureString("Q1 '05", f);
+                            height += labelSize.Width;
+
+                            // future work - switch to just the year, then the decade
+                            // if ever necessary
+                        }
                     }
                 }
             }
@@ -110,10 +126,17 @@ namespace Pybrary.Plot
             {
                 if (v > ScaleMaximum)
                     break;
-                v = cal.AddMonths(v, (axisType == AxisType.Quarters) ? 3 : 1);
+                if (axisType == AxisType.DailyWithHourlyTicks)
+                    v = cal.AddDays(v, 1);
+                else if (axisType == AxisType.Quarters)
+                    v = cal.AddMonths(v, 3);
+                else
+                    v = cal.AddMonths(v, 1);
             }
             return i + 1;
         }
+
+        private delegate DateTime CalculateNext(DateTime v);
 
         public void DrawX(Graphics g, AdvancedRect area, AdvancedRect plotArea)
         {
@@ -135,12 +158,58 @@ namespace Pybrary.Plot
                 float dayLabelSpacing = 0;
                 if (axisType == AxisType.MonthsHorizontalWithDailyLabels)
                     dayLabelSpacing = 1f / 16;
+
+                // Create a function that, applied to a date/time, returns the
+                // "next" value for major labels.
+                CalculateNext NextMajor = null;
+                if (axisType == AxisType.Quarters)
+                    NextMajor = delegate(DateTime dt) { return cal.AddMonths(dt, 3); };
+                else if (axisType == AxisType.DailyWithHourlyTicks)
+                    NextMajor = delegate(DateTime dt) { return cal.AddDays(dt, 1); };
+                else
+                    NextMajor = delegate(DateTime dt) { return cal.AddMonths(dt, 1); };
+
+                // Same dealy-o, but for minor ticks / labels.
+                CalculateNext NextMinor = null;
+                if (axisType == AxisType.MonthsHorizontalWithDailyTicks || axisType == AxisType.MonthsHorizontalWithDailyLabels)
+                    NextMinor = delegate(DateTime dt) { return cal.AddDays(dt, 1); };
+                else if (axisType == AxisType.DailyWithHourlyTicks)
+                    NextMinor = delegate(DateTime dt) { return cal.AddHours(dt, 1); };
+                else if (axisType == AxisType.Quarters)
+                    NextMinor = delegate(DateTime dt) { return cal.AddMonths(dt, 1); };
+
+                // Determine major label format -- {0} is the major label v,
+                // {1} is the quarter
+                string major_label = null;
+                if (axisType == AxisType.Quarters)
+                    major_label = "Q{1} {0:\\'yy}";
+                else if (axisType == AxisType.DailyWithHourlyTicks)
+                    major_label = "{0:MMM dd \\'yy}";
+                else
+                    major_label = "{0:MMM \\'yy}";
+
+                // Determine minor label format:
+                string minor_label = null;
+                if (axisType == AxisType.MonthsHorizontalWithDailyLabels)
+                    minor_label = "{0:dd}";
+
+                // StringFormat for drawing major labels:
+                StringFormat major_form = new StringFormat();
+                if (axisType == AxisType.MonthsVertical || axisType == AxisType.Quarters)
+                    major_form.FormatFlags = StringFormatFlags.DirectionVertical;
+
+                // Determine first major label value.
                 DateTime v;
                 if (axisType == AxisType.Quarters)
                     // set v to beginning of quarter which ScaleMinimum is in
                     v = new DateTime(ScaleMinimum.Year, (((ScaleMinimum.Month - 1) / 3) * 3) + 1, 1);
-                else // monthly labels
+                else if (axisType == AxisType.DailyWithHourlyTicks)
+                    // set v to beginning of day
+                    v = new DateTime(ScaleMinimum.Year, ScaleMinimum.Month, ScaleMinimum.Day);
+                else
+                    // set v to beginning of month
                     v = new DateTime(ScaleMinimum.Year, ScaleMinimum.Month, 1);
+
                 for (int i = 0; i < calculateNumLabels(); i++)
                 {
                     float x1 = DataToCoordinate(v, area);
@@ -149,63 +218,52 @@ namespace Pybrary.Plot
                     if (x1 > area.BottomRight.X)
                         break;
 
-                    DateTime v2 = cal.AddMonths(v, (axisType == AxisType.Quarters) ? 3 : 1);
+                    DateTime v2 = NextMajor(v);
                     float x2 = DataToCoordinate(v2, area);
                     x2 = Math.Min(x2, area.BottomRight.X);
 
+                    // Major ticks & gridlines:
                     g.DrawLine(p, x1, area.TopLeft.Y, x1, area.TopLeft.Y + tick);
                     if (gridlinesEnabled && x1 > area.TopLeft.X && x1 < area.BottomRight.X)
                         g.DrawLine(pgrid, x1, plotArea.TopLeft.Y, x1, plotArea.BottomRight.Y);
 
-                    if (axisType == AxisType.MonthsHorizontalWithDailyTicks || axisType == AxisType.MonthsHorizontalWithDailyLabels)
+                    // Minor ticks:
+                    if (NextMinor != null)
                     {
-                        // Draw daily ticks
-                        int days = cal.GetDaysInMonth(v.Year, v.Month);
-                        for (int d = 1; d <= days; d++)
+                        DateTime v3 = NextMinor(v);
+                        while (v3 < v2)
                         {
-                            float xd = DataToCoordinate(new DateTime(v.Year, v.Month, d), area);
+                            float xd = DataToCoordinate(v3, area);
                             if (xd > area.TopLeft.X && xd < area.BottomRight.X)
                                 g.DrawLine(pminor, xd, area.TopLeft.Y, xd, area.TopLeft.Y + dayTick);
+                            v3 = NextMinor(v3);
                         }
                     }
-                    else if (axisType == AxisType.Quarters)
+
+                    if (minor_label != null && NextMinor != null)
                     {
-                        for (int d = 1; d < 3; d++)
+                        DateTime v3 = v;
+                        while (v3 < v2)
                         {
-                            float xd = DataToCoordinate(new DateTime(v.Year, v.Month + d, 1), area);
-                            if (xd > area.TopLeft.X && xd < area.BottomRight.X)
-                                g.DrawLine(pminor, xd, area.TopLeft.Y, xd, area.TopLeft.Y + dayTick);
+                            DateTime vnext = NextMinor(v3);
+
+                            float xd_left = DataToCoordinate(v3, area);
+                            float xd_right = DataToCoordinate(vnext, area);
+                            if (xd_left >= area.TopLeft.X && xd_right <= area.BottomRight.X)
+                            {
+                                string dtxt = String.Format(minor_label, v3);
+                                SizeF dsz = g.MeasureString(dtxt, f2);
+                                g.DrawString(dtxt, f2, br, ((xd_left + xd_right) / 2) - (dsz.Width / 2), area.TopLeft.Y);
+                            }
+
+                            v3 = vnext;
                         }
                     }
 
-                    if (axisType == AxisType.MonthsHorizontalWithDailyLabels)
-                    {
-                        // Draw day labels
-                        int days = cal.GetDaysInMonth(v.Year, v.Month);
-                        for (int d = 1; d <= days; d++)
-                        {
-                            float xd_left = DataToCoordinate(new DateTime(v.Year, v.Month, d), area);
-                            float xd_right = DataToCoordinate(new DateTime(v.Year, v.Month, d) + new TimeSpan(1, 0, 0, 0), area);
-                            if (xd_left < area.TopLeft.X || xd_right > area.BottomRight.X)
-                                continue;
-                            string dtxt = String.Format("{0}", d);
-                            SizeF dsz = g.MeasureString(dtxt, f2);
-                            g.DrawString(dtxt, f2, br, ((xd_left + xd_right) / 2) - (dsz.Width / 2), area.TopLeft.Y);
-                        }
-                    }
-
-                    StringFormat form = new StringFormat();
-                    if (axisType == AxisType.MonthsVertical || axisType == AxisType.Quarters)
-                        form.FormatFlags = StringFormatFlags.DirectionVertical;
-
-                    string txt;
-                    if (axisType == AxisType.Quarters)
-                        txt = String.Format("Q{0} {1:\\'yy}", (v.Month / 3) + 1, v);
-                    else
-                        txt = String.Format("{0:MMM \\'yy}", v);
-
-                    SizeF sz = g.MeasureString(txt, f, 100, form);
-                    g.DrawString(txt, f, br, ((x1 + x2) / 2) - (sz.Width / 2), area.TopLeft.Y + tick + dayLabelSpacing, form);
+                    // Draw major label:
+                    string txt = String.Format(major_label, v, (v.Month / 3) + 1);
+                    SizeF sz = g.MeasureString(txt, f, 100, major_form);
+                    g.DrawString(txt, f, br, ((x1 + x2) / 2) - (sz.Width / 2), area.TopLeft.Y + tick + dayLabelSpacing, major_form);
 
                     v = v2;
                 }
