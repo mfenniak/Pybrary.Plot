@@ -24,6 +24,7 @@ namespace Pybrary.Plot
         private Plot parent;
 
         private enum AxisType {
+            DailyWithHourlyLabels,
             DailyWithHourlyTicks,
             MonthsHorizontalWithDailyLabels,
             MonthsHorizontalWithDailyTicks,
@@ -57,7 +58,17 @@ namespace Pybrary.Plot
                 {
                     // Daily major labels.
                     height += labelSize.Height;
-                    axisType = AxisType.DailyWithHourlyTicks;
+
+                    // Check for whether hourly labels might fit
+                    labelSize = g.MeasureString("12P", f2);
+                    double numHours = (ScaleMaximum - ScaleMinimum).TotalHours;
+                    if (numHours * labelSize.Width < maximumWidth)
+                    {
+                        axisType = AxisType.DailyWithHourlyLabels;
+                        height += 1f / 16;
+                    }
+                    else
+                        axisType = AxisType.DailyWithHourlyTicks;
                 }
                 else
                 {
@@ -75,7 +86,7 @@ namespace Pybrary.Plot
                         SizeF dayLabelSize = g.MeasureString("30", f2);
 
                         // do we also have room for daily ticks?
-                        int numDays = (ScaleMaximum - ScaleMinimum).Days;
+                        double numDays = (ScaleMaximum - ScaleMinimum).TotalDays;
                         if (numDays * dayLabelSize.Width < maximumWidth)
                         {
                             axisType = AxisType.MonthsHorizontalWithDailyLabels;
@@ -126,7 +137,7 @@ namespace Pybrary.Plot
             {
                 if (v > ScaleMaximum)
                     break;
-                if (axisType == AxisType.DailyWithHourlyTicks)
+                if (axisType == AxisType.DailyWithHourlyTicks || axisType == AxisType.DailyWithHourlyLabels)
                     v = cal.AddDays(v, 1);
                 else if (axisType == AxisType.Quarters)
                     v = cal.AddMonths(v, 3);
@@ -153,18 +164,12 @@ namespace Pybrary.Plot
             using (Pen pgrid = gridlinePen.CreatePen())
             using (Pen pminor = minorTickPen.CreatePen())
             {
-                float tick = tickLength;
-                float dayTick = minorTickLength;
-                float dayLabelSpacing = 0;
-                if (axisType == AxisType.MonthsHorizontalWithDailyLabels)
-                    dayLabelSpacing = 1f / 16;
-
                 // Create a function that, applied to a date/time, returns the
                 // "next" value for major labels.
                 CalculateNext NextMajor = null;
                 if (axisType == AxisType.Quarters)
                     NextMajor = delegate(DateTime dt) { return cal.AddMonths(dt, 3); };
-                else if (axisType == AxisType.DailyWithHourlyTicks)
+                else if (axisType == AxisType.DailyWithHourlyTicks || axisType == AxisType.DailyWithHourlyLabels)
                     NextMajor = delegate(DateTime dt) { return cal.AddDays(dt, 1); };
                 else
                     NextMajor = delegate(DateTime dt) { return cal.AddMonths(dt, 1); };
@@ -173,7 +178,7 @@ namespace Pybrary.Plot
                 CalculateNext NextMinor = null;
                 if (axisType == AxisType.MonthsHorizontalWithDailyTicks || axisType == AxisType.MonthsHorizontalWithDailyLabels)
                     NextMinor = delegate(DateTime dt) { return cal.AddDays(dt, 1); };
-                else if (axisType == AxisType.DailyWithHourlyTicks)
+                else if (axisType == AxisType.DailyWithHourlyTicks || axisType == AxisType.DailyWithHourlyLabels)
                     NextMinor = delegate(DateTime dt) { return cal.AddHours(dt, 1); };
                 else if (axisType == AxisType.Quarters)
                     NextMinor = delegate(DateTime dt) { return cal.AddMonths(dt, 1); };
@@ -183,15 +188,22 @@ namespace Pybrary.Plot
                 string major_label = null;
                 if (axisType == AxisType.Quarters)
                     major_label = "Q{1} {0:\\'yy}";
-                else if (axisType == AxisType.DailyWithHourlyTicks)
-                    major_label = "{0:MMM dd \\'yy}";
+                else if (axisType == AxisType.DailyWithHourlyTicks || axisType == AxisType.DailyWithHourlyLabels)
+                    major_label = "{0:MMM %d \\'yy}";
                 else
                     major_label = "{0:MMM \\'yy}";
 
                 // Determine minor label format:
                 string minor_label = null;
                 if (axisType == AxisType.MonthsHorizontalWithDailyLabels)
-                    minor_label = "{0:dd}";
+                    minor_label = "{0:%d}";
+                else if (axisType == AxisType.DailyWithHourlyLabels)
+                    minor_label = "{0:%h%t}";
+
+                // Add some extra spacing if putting minor labels in.
+                float minorLabelSpacing = 0;
+                if (NextMinor != null && minor_label != null)
+                    minorLabelSpacing = 1f / 16;
 
                 // StringFormat for drawing major labels:
                 StringFormat major_form = new StringFormat();
@@ -203,7 +215,7 @@ namespace Pybrary.Plot
                 if (axisType == AxisType.Quarters)
                     // set v to beginning of quarter which ScaleMinimum is in
                     v = new DateTime(ScaleMinimum.Year, (((ScaleMinimum.Month - 1) / 3) * 3) + 1, 1);
-                else if (axisType == AxisType.DailyWithHourlyTicks)
+                else if (axisType == AxisType.DailyWithHourlyTicks || axisType == AxisType.DailyWithHourlyLabels)
                     // set v to beginning of day
                     v = new DateTime(ScaleMinimum.Year, ScaleMinimum.Month, ScaleMinimum.Day);
                 else
@@ -223,7 +235,7 @@ namespace Pybrary.Plot
                     x2 = Math.Min(x2, area.BottomRight.X);
 
                     // Major ticks & gridlines:
-                    g.DrawLine(p, x1, area.TopLeft.Y, x1, area.TopLeft.Y + tick);
+                    g.DrawLine(p, x1, area.TopLeft.Y, x1, area.TopLeft.Y + tickLength);
                     if (gridlinesEnabled && x1 > area.TopLeft.X && x1 < area.BottomRight.X)
                         g.DrawLine(pgrid, x1, plotArea.TopLeft.Y, x1, plotArea.BottomRight.Y);
 
@@ -235,7 +247,7 @@ namespace Pybrary.Plot
                         {
                             float xd = DataToCoordinate(v3, area);
                             if (xd > area.TopLeft.X && xd < area.BottomRight.X)
-                                g.DrawLine(pminor, xd, area.TopLeft.Y, xd, area.TopLeft.Y + dayTick);
+                                g.DrawLine(pminor, xd, area.TopLeft.Y, xd, area.TopLeft.Y + minorTickLength);
                             v3 = NextMinor(v3);
                         }
                     }
@@ -263,7 +275,7 @@ namespace Pybrary.Plot
                     // Draw major label:
                     string txt = String.Format(major_label, v, (v.Month / 3) + 1);
                     SizeF sz = g.MeasureString(txt, f, 100, major_form);
-                    g.DrawString(txt, f, br, ((x1 + x2) / 2) - (sz.Width / 2), area.TopLeft.Y + tick + dayLabelSpacing, major_form);
+                    g.DrawString(txt, f, br, ((x1 + x2) / 2) - (sz.Width / 2), area.TopLeft.Y + tickLength + minorLabelSpacing, major_form);
 
                     v = v2;
                 }
@@ -272,7 +284,7 @@ namespace Pybrary.Plot
                 float xL = DataToCoordinate(v, area);
                 if (xL < area.BottomRight.X)
                 {
-                    g.DrawLine(p, xL, area.TopLeft.Y, xL, area.TopLeft.Y + tick);
+                    g.DrawLine(p, xL, area.TopLeft.Y, xL, area.TopLeft.Y + tickLength);
                     if (gridlinesEnabled)
                         g.DrawLine(pgrid, xL, plotArea.TopLeft.Y, xL, plotArea.BottomRight.Y);
                 }
