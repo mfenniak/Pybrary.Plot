@@ -175,120 +175,120 @@ namespace Pybrary.Plot
             using (Pen pgrid = gridlinePen.CreatePen())
             using (Pen pminor = minorTickPen.CreatePen())
             {
-                CalculateNext NextMajor = GetNextMajorFunction();
+                CalculateNext nextMajor = GetNextMajorFunction();
 
                 // Same dealy-o, but for minor ticks / labels.
-                CalculateNext NextMinor = null;
+                CalculateNext nextMinor = null;
                 if (axisType == AxisType.MonthsHorizontalWithDailyTicks || axisType == AxisType.MonthsHorizontalWithDailyLabels)
-                    NextMinor = delegate(DateTime dt) { return cal.AddDays(dt, 1); };
+                    nextMinor = delegate(DateTime dt) { return cal.AddDays(dt, 1); };
                 else if (axisType == AxisType.DailyWithHourlyTicks || axisType == AxisType.DailyWithHourlyLabels)
-                    NextMinor = delegate(DateTime dt) { return cal.AddHours(dt, 1); };
+                    nextMinor = delegate(DateTime dt) { return cal.AddHours(dt, 1); };
                 else if (axisType == AxisType.Quarters)
-                    NextMinor = delegate(DateTime dt) { return cal.AddMonths(dt, 1); };
+                    nextMinor = delegate(DateTime dt) { return cal.AddMonths(dt, 1); };
 
                 // Determine major label format -- {0} is the major label v,
                 // {1} is the quarter
-                string major_label = null;
+                string majorLabel = null;
                 if (axisType == AxisType.Quarters)
-                    major_label = "Q{1} {0:\\'yy}";
+                    majorLabel = "Q{1} {0:\\'yy}";
                 else if (axisType == AxisType.DailyWithHourlyTicks || axisType == AxisType.DailyWithHourlyLabels)
-                    major_label = "{0:MMM %d \\'yy}";
+                    majorLabel = "{0:MMM %d \\'yy}";
                 else
-                    major_label = "{0:MMM \\'yy}";
+                    majorLabel = "{0:MMM \\'yy}";
 
                 // Determine minor label format:
-                string minor_label = null;
+                string minorLabel = null;
                 if (axisType == AxisType.MonthsHorizontalWithDailyLabels)
-                    minor_label = "{0:%d}";
+                    minorLabel = "{0:%d}";
                 else if (axisType == AxisType.DailyWithHourlyLabels)
-                    minor_label = "{0:%h%t}";
+                    minorLabel = "{0:%h%t}";
 
                 // Add some extra spacing if putting minor labels in.
                 float minorLabelSpacing = 0;
-                if (NextMinor != null && minor_label != null)
+                if (nextMinor != null && minorLabel != null)
                     minorLabelSpacing = 1f / 16;
 
                 // StringFormat for drawing major labels:
-                StringFormat major_form = new StringFormat();
+                StringFormat majorForm = new StringFormat();
                 if (axisType == AxisType.MonthsVertical || axisType == AxisType.Quarters)
-                    major_form.FormatFlags = StringFormatFlags.DirectionVertical;
+                    majorForm.FormatFlags = StringFormatFlags.DirectionVertical;
 
                 // Determine first major label value.
-                DateTime v;
+                DateTime dtLeft;
                 if (axisType == AxisType.Quarters)
                     // set v to beginning of quarter which ScaleMinimum is in
-                    v = new DateTime(ScaleMinimum.Year, (((ScaleMinimum.Month - 1) / 3) * 3) + 1, 1);
+                    dtLeft = new DateTime(ScaleMinimum.Year, (((ScaleMinimum.Month - 1) / 3) * 3) + 1, 1);
                 else if (axisType == AxisType.DailyWithHourlyTicks || axisType == AxisType.DailyWithHourlyLabels)
                     // set v to beginning of day
-                    v = new DateTime(ScaleMinimum.Year, ScaleMinimum.Month, ScaleMinimum.Day);
+                    dtLeft = new DateTime(ScaleMinimum.Year, ScaleMinimum.Month, ScaleMinimum.Day);
                 else
                     // set v to beginning of month
-                    v = new DateTime(ScaleMinimum.Year, ScaleMinimum.Month, 1);
+                    dtLeft = new DateTime(ScaleMinimum.Year, ScaleMinimum.Month, 1);
 
                 for (int i = 0; i < calculateNumLabels(); i++)
                 {
-                    float x1 = DataToCoordinate(v, area);
-                    x1 = Math.Max(x1, area.TopLeft.X);
+                    float xLeft = DataToCoordinate(dtLeft, area);
+                    xLeft = Math.Max(xLeft, area.TopLeft.X);
 
-                    if (x1 > area.BottomRight.X)
+                    if (xLeft > area.BottomRight.X)
                         break;
 
-                    DateTime v2 = NextMajor(v);
-                    float x2 = DataToCoordinate(v2, area);
-                    x2 = Math.Min(x2, area.BottomRight.X);
+                    DateTime dtRight = nextMajor(dtLeft);
+                    float xRight = DataToCoordinate(dtRight, area);
+                    xRight = Math.Min(xRight, area.BottomRight.X);
 
                     // Major ticks & gridlines:
-                    g.DrawLine(p, x1, area.TopLeft.Y, x1, area.TopLeft.Y + tickLength);
-                    if (gridlinesEnabled && x1 > area.TopLeft.X && x1 < area.BottomRight.X)
-                        g.DrawLine(pgrid, x1, plotArea.TopLeft.Y, x1, plotArea.BottomRight.Y);
+                    g.DrawLine(p, xLeft, area.TopLeft.Y, xLeft, area.TopLeft.Y + tickLength);
+                    if (gridlinesEnabled && xLeft > area.TopLeft.X && xLeft < area.BottomRight.X)
+                        g.DrawLine(pgrid, xLeft, plotArea.TopLeft.Y, xLeft, plotArea.BottomRight.Y);
 
                     // Minor ticks:
-                    if (NextMinor != null)
+                    if (nextMinor != null)
                     {
-                        DateTime v3 = NextMinor(v);
-                        while (v3 < v2)
+                        DateTime dtMinorLeft = nextMinor(dtLeft);
+                        while (dtMinorLeft < dtRight)
                         {
-                            float xd = DataToCoordinate(v3, area);
-                            if (xd > area.TopLeft.X && xd < area.BottomRight.X)
-                                g.DrawLine(pminor, xd, area.TopLeft.Y, xd, area.TopLeft.Y + minorTickLength);
-                            v3 = NextMinor(v3);
+                            float xMinorLeft = DataToCoordinate(dtMinorLeft, area);
+                            if (xMinorLeft > area.TopLeft.X && xMinorLeft < area.BottomRight.X)
+                                g.DrawLine(pminor, xMinorLeft, area.TopLeft.Y, xMinorLeft, area.TopLeft.Y + minorTickLength);
+                            dtMinorLeft = nextMinor(dtMinorLeft);
                         }
                     }
 
-                    if (minor_label != null && NextMinor != null)
+                    if (minorLabel != null && nextMinor != null)
                     {
-                        DateTime v3 = v;
-                        while (v3 < v2)
+                        DateTime dtMinorLeft = dtLeft;
+                        while (dtMinorLeft < dtRight)
                         {
-                            DateTime vnext = NextMinor(v3);
+                            DateTime dtMinorRight = nextMinor(dtMinorLeft);
 
-                            float xd_left = DataToCoordinate(v3, area);
-                            float xd_right = DataToCoordinate(vnext, area);
-                            if (xd_left >= area.TopLeft.X && xd_right <= area.BottomRight.X)
+                            float xMinorLeft = DataToCoordinate(dtMinorLeft, area);
+                            float xMinorRight = DataToCoordinate(dtMinorRight, area);
+                            if (xMinorLeft >= area.TopLeft.X && xMinorRight <= area.BottomRight.X)
                             {
-                                string dtxt = String.Format(minor_label, v3);
+                                string dtxt = String.Format(minorLabel, dtMinorLeft);
                                 SizeF dsz = g.MeasureString(dtxt, f2);
-                                float xlabel = ((xd_left + xd_right) / 2) - (dsz.Width / 2);
+                                float xlabel = ((xMinorLeft + xMinorRight) / 2) - (dsz.Width / 2);
                                 if (xlabel > area.TopLeft.X && (xlabel + dsz.Width) < area.BottomRight.X)
-                                    g.DrawString(dtxt, f2, br, ((xd_left + xd_right) / 2) - (dsz.Width / 2), area.TopLeft.Y);
+                                    g.DrawString(dtxt, f2, br, ((xMinorLeft + xMinorRight) / 2) - (dsz.Width / 2), area.TopLeft.Y);
                             }
 
-                            v3 = vnext;
+                            dtMinorLeft = dtMinorRight;
                         }
                     }
 
                     // Draw major label:
-                    string txt = String.Format(major_label, v, (v.Month / 3) + 1);
-                    SizeF sz = g.MeasureString(txt, f, 100, major_form);
-                    float draw_x = ((x1 + x2) / 2) - (sz.Width / 2);
+                    string txt = String.Format(majorLabel, dtLeft, (dtLeft.Month / 3) + 1);
+                    SizeF sz = g.MeasureString(txt, f, 100, majorForm);
+                    float draw_x = ((xLeft + xRight) / 2) - (sz.Width / 2);
                     if (draw_x > area.TopLeft.X && (draw_x + sz.Width) < area.BottomRight.X)
-                        g.DrawString(txt, f, br, ((x1 + x2) / 2) - (sz.Width / 2), area.TopLeft.Y + tickLength + minorLabelSpacing, major_form);
+                        g.DrawString(txt, f, br, ((xLeft + xRight) / 2) - (sz.Width / 2), area.TopLeft.Y + tickLength + minorLabelSpacing, majorForm);
 
-                    v = v2;
+                    dtLeft = dtRight;
                 }
 
                 // one final tick to signify end of last visible month
-                float xL = DataToCoordinate(v, area);
+                float xL = DataToCoordinate(dtLeft, area);
                 if (xL < area.BottomRight.X)
                 {
                     g.DrawLine(p, xL, area.TopLeft.Y, xL, area.TopLeft.Y + tickLength);
