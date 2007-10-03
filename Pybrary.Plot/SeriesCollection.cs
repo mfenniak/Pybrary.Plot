@@ -133,7 +133,7 @@ namespace Pybrary.Plot
                 if (minX == null || (seriesMinX != null && seriesMinX < minX.Value))
                     minX = seriesMinX;
                 double? seriesMaxX = s.Value.MaxX;
-                if (maxX == null || (seriesMaxX != null && seriesMinX > minX.Value))
+                if (maxX == null || (seriesMaxX != null && seriesMaxX > maxX.Value))
                     maxX = seriesMaxX;
             }
         }
