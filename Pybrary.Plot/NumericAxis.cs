@@ -335,12 +335,12 @@ namespace Pybrary.Plot
 
         public static double CalculateRoundedMax(double max, double min)
         {
-            return max + ((max - min) * 0.05);
+            return max + (Math.Max(max - min, 1) * 0.05);
         }
 
         public static double CalculateRoundedMin(double max, double min)
         {
-            return min - ((max - min) * 0.05);
+            return min - (Math.Max(max - min, 1) * 0.05);
         }
 
         public static bool ToleranceCheck(double a, double b, double tolerance)
