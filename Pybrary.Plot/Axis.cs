@@ -17,6 +17,21 @@ namespace Pybrary.Plot
 
         protected AdvancedRect? drawArea;
 
+        public FontDescription LabelFont
+        {
+            get { return labelFont; }
+        }
+
+        public PenDescription TickPen
+        {
+            get { return tickPen; }
+        }
+
+        public PenDescription GridlinePen
+        {
+            get { return gridlinePen; }
+        }
+
         public bool GridlinesEnabled
         {
             get

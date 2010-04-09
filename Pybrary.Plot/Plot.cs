@@ -62,6 +62,21 @@ namespace Pybrary.Plot
             raiseEvent();
         }
 
+        public FontDescription HeaderCenterFont
+        {
+            get { return centerHeaderFont; }
+        }
+
+        public FontDescription HeaderLeftFont
+        {
+            get { return leftHeaderFont; }
+        }
+
+        public FontDescription HeaderRightFont
+        {
+            get { return rightHeaderFont; }
+        }
+
         public void PaintOn(Graphics g, RectangleF _area)
         {
             GraphicsState _s = g.Save();
@@ -369,6 +384,11 @@ namespace Pybrary.Plot
             {
                 return annotations;
             }
+        }
+
+        public BrushDescription Background
+        {
+            get { return background; }
         }
     }
 }

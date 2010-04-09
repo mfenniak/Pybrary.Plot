@@ -29,6 +29,11 @@ namespace Pybrary.Plot
         {
         }
 
+        public FontDescription TitleFont
+        {
+            get { return titleFont; }
+        }
+
         protected abstract bool AxisReverseOfCoordinateArea();
         protected abstract float AxisLength(AdvancedRect dataArea);
         protected abstract float AxisStart(AdvancedRect dataArea);
