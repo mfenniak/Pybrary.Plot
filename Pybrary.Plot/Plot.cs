@@ -85,14 +85,31 @@ namespace Pybrary.Plot
             // g.PageUnit provides.  The plotting library works assuming that
             // PageUnit is Inch, so we must transform the Rectangle into the
             // appropriate rect.
+            //PointF[] trans = new PointF[] {
+            //    new PointF(_area.Left, _area.Top),
+            //    new PointF(_area.Left + _area.Width, _area.Top + _area.Height)
+            //};
+            //g.TransformPoints(CoordinateSpace.Device, CoordinateSpace.Page, trans);
+            //g.PageUnit = GraphicsUnit.Inch;
+            //g.TransformPoints(CoordinateSpace.Page, CoordinateSpace.Device, trans);
+            //AdvancedRect area = new AdvancedRect(trans[0], trans[1]);
+
+            // Plotting functions assume that the coordinate space is in inches.
+            // We could accomplish this by switching the PageUnit to Inch, but
+            // that's not supported under Mono.  So, we try to switch the PageUnit
+            // to Pixel (hopefully supported by Mono), and then use a transform
+            // based upon device DPI to convert the graphic space to inches.
             PointF[] trans = new PointF[] {
                 new PointF(_area.Left, _area.Top),
                 new PointF(_area.Left + _area.Width, _area.Top + _area.Height)
             };
             g.TransformPoints(CoordinateSpace.Device, CoordinateSpace.Page, trans);
-            g.PageUnit = GraphicsUnit.Inch;
+            g.PageUnit = GraphicsUnit.Pixel;
             g.TransformPoints(CoordinateSpace.Page, CoordinateSpace.Device, trans);
-            AdvancedRect area = new AdvancedRect(trans[0], trans[1]);
+            _area = new RectangleF(trans[0], new SizeF(trans[1].X - trans[0].X, trans[1].Y - trans[0].Y));
+            // Now that we have a true pixel area, convert area output to inch-based.
+            g.ScaleTransform(g.DpiX, g.DpiY);
+            AdvancedRect area = new AdvancedRect(new PointF(_area.Left / g.DpiX, _area.Top / g.DpiY), new PointF(_area.Right / g.DpiX, _area.Bottom / g.DpiY));
 
             using (Brush bg = background.CreateBrush())
                 g.FillRectangle(bg, area.Rect);
@@ -106,7 +123,7 @@ namespace Pybrary.Plot
             if (centerHeader != null)
             {
                 using (Brush br = centerHeaderFont.CreateBrush())
-                using (Font f = centerHeaderFont.CreateFont())
+                using (Font f = centerHeaderFont.CreateFont(g))
                 {
                     headerSize = g.MeasureString(centerHeader, f);
                     g.DrawString(centerHeader, f, br, area.Center.X - (headerSize.Width / 2), area.TopLeft.Y);
@@ -115,9 +132,9 @@ namespace Pybrary.Plot
             if (rightHeader != null || leftHeader != null)
             {
                 using (Brush left_br = leftHeaderFont.CreateBrush())
-                using (Font left_f = leftHeaderFont.CreateFont())
+                using (Font left_f = leftHeaderFont.CreateFont(g))
                 using (Brush right_br = rightHeaderFont.CreateBrush())
-                using (Font right_f = rightHeaderFont.CreateFont())
+                using (Font right_f = rightHeaderFont.CreateFont(g))
                 {
                     SizeF leftHeaderSize = (leftHeader != null) ? g.MeasureString(leftHeader, left_f) : new SizeF(0, 0);
                     SizeF rightHeaderSize = (rightHeader != null) ? g.MeasureString(rightHeader, right_f) : new SizeF(0, 0);

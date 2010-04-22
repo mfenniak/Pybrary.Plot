@@ -32,7 +32,7 @@ namespace Pybrary.Plot
 
         protected SizeF Size(Graphics g)
         {
-            using (Font f = TextFont.CreateFont())
+            using (Font f = TextFont.CreateFont(g))
                 return g.MeasureString(text, f);
         }
 
@@ -48,7 +48,7 @@ namespace Pybrary.Plot
                 g.DrawRectangle(p, rect.X, rect.Y, rect.Width, rect.Height);
             }
 
-            using (Font f = TextFont.CreateFont())
+            using (Font f = TextFont.CreateFont(g))
             using (Brush br = TextFont.CreateBrush())
             {
                 g.DrawString(Text, f, br, pt);

@@ -43,8 +43,8 @@ namespace Pybrary.Plot
 
         public float CalculateHeight(Graphics g, float maximumWidth)
         {
-            using (Font f = labelFont.CreateFont())
-            using (Font f2 = smallLabelFont.CreateFont())
+            using (Font f = labelFont.CreateFont(g))
+            using (Font f2 = smallLabelFont.CreateFont(g))
             {
                 // Try different axis, from the smallest increments to the
                 // largest increments, and check which fits.
@@ -169,8 +169,8 @@ namespace Pybrary.Plot
             GraphicsState _s = g.Save();
 
             using (Brush br = labelFont.CreateBrush())
-            using (Font f = labelFont.CreateFont())
-            using (Font f2 = smallLabelFont.CreateFont())
+            using (Font f = labelFont.CreateFont(g))
+            using (Font f2 = smallLabelFont.CreateFont(g))
             using (Pen p = tickPen.CreatePen())
             using (Pen pgrid = gridlinePen.CreatePen())
             using (Pen pminor = minorTickPen.CreatePen())

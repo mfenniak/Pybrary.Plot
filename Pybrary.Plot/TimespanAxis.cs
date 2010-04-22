@@ -42,7 +42,7 @@ namespace Pybrary.Plot
 
             dailyTicks = weeklyLabels = monthlyLabels = quarterlyLabels = yearlyLabels = false;
 
-            using (Font f = labelFont.CreateFont())
+            using (Font f = labelFont.CreateFont(g))
             {
                 weeklyLabels = true;
                 TimeSpan duration = ScaleMaximum - ScaleMinimum;
@@ -105,7 +105,7 @@ namespace Pybrary.Plot
             }
 
             // Add in an axis title, "Time (years)"
-            using (Font f = titleFont.CreateFont())
+            using (Font f = titleFont.CreateFont(g))
             {
                 SizeF labelSize = g.MeasureString("Time (years)", f);
                 height += labelSize.Height;
@@ -127,7 +127,7 @@ namespace Pybrary.Plot
             //    g.FillRectangle(br, area.Rect);
             GraphicsState _s = g.Save();
 
-            using (Font f = titleFont.CreateFont())
+            using (Font f = titleFont.CreateFont(g))
             using (Brush br = titleFont.CreateBrush())
             {
                 string txt = "Time (";
@@ -142,7 +142,7 @@ namespace Pybrary.Plot
             }
 
             using (Brush br = labelFont.CreateBrush())
-            using (Font f = labelFont.CreateFont())
+            using (Font f = labelFont.CreateFont(g))
             using (Pen p = tickPen.CreatePen())
             using (Pen pgrid = gridlinePen.CreatePen())
             using (Pen pminor = minorTickPen.CreatePen())

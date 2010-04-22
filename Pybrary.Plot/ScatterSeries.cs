@@ -188,7 +188,7 @@ namespace Pybrary.Plot
             public SizeF CalculateSize(Graphics g, string seriesName)
             {
                 SizeF sz;
-                using (Font f = series.LegendFont.CreateFont())
+                using (Font f = series.LegendFont.CreateFont(g))
                     sz = g.MeasureString(seriesName, f);
                 sz.Width += 3f / 96; // space between swatch and name
                 sz.Width += 0.2f; // swatch width
@@ -210,7 +210,7 @@ namespace Pybrary.Plot
                         sym.DrawCenteredAt(g, new PointF(area.TopLeft.X + 0.1f, area.Center.Y));
                 }
 
-                using (Font f = series.LegendFont.CreateFont())
+                using (Font f = series.LegendFont.CreateFont(g))
                 using (Brush br = series.LegendFont.CreateBrush())
                 {
                     SizeF sz = g.MeasureString(seriesName, f);

@@ -307,7 +307,7 @@ namespace Pybrary.Plot
             public SizeF CalculateSize(Graphics g, string seriesName)
             {
                 SizeF sz;
-                using (Font f = series.LegendFont.CreateFont())
+                using (Font f = series.LegendFont.CreateFont(g))
                     sz = g.MeasureString(Name, f);
                 sz.Width += 3f / 96; // space between swatch and name
                 sz.Width += 0.2f; // swatch width
@@ -322,7 +322,7 @@ namespace Pybrary.Plot
                 using (Brush br = series.Brushes[idx].CreateBrush())
                     g.FillRectangle(br, new RectangleF(area.TopLeft.X, area.TopLeft.Y, 0.2f, 0.2f));
 
-                using (Font f = series.LegendFont.CreateFont())
+                using (Font f = series.LegendFont.CreateFont(g))
                 using (Brush br = series.LegendFont.CreateBrush())
                 {
                     SizeF sz = g.MeasureString(Name, f);

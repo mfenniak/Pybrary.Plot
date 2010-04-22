@@ -19,9 +19,9 @@ namespace Pybrary.Plot
             this.style = style;
         }
 
-        public Font CreateFont()
+        public Font CreateFont(Graphics g)
         {
-            return new Font(familyName, size, style);
+            return new Font(familyName, size / g.DpiY, style);
         }
     }
 }

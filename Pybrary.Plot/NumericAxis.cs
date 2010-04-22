@@ -445,7 +445,7 @@ namespace Pybrary.Plot
             if (title != null)
             {
                 // title
-                using (Font f = titleFont.CreateFont())
+                using (Font f = titleFont.CreateFont(g))
                     width += g.MeasureString(title, f).Height;
 
                 // Some padding between title and labels
@@ -456,7 +456,7 @@ namespace Pybrary.Plot
             if (logAxis)
             {
                 // Longest labels will always be min or max.
-                using (Font f = labelFont.CreateFont())
+                using (Font f = labelFont.CreateFont(g))
                 {
                     double min = Math.Pow(10, Math.Ceiling(Math.Log10(ScaleMinimum)));
                     double max = Math.Pow(10, Math.Floor(Math.Log10(ScaleMaximum)));
@@ -469,7 +469,7 @@ namespace Pybrary.Plot
             {
                 int intervals;
                 double delta = CalculateInterval(ScaleMinimum, ScaleMaximum, 10, out intervals);
-                using (Font f = labelFont.CreateFont())
+                using (Font f = labelFont.CreateFont(g))
                 {
                     SizeF sz1 = g.MeasureString(FormatLabel(delta), f);
                     SizeF sz2 = g.MeasureString(FormatLabel(delta * (intervals - 1)), f);
@@ -495,7 +495,7 @@ namespace Pybrary.Plot
             if (title != null)
             {
                 using (Brush br = titleFont.CreateBrush())
-                using (Font f = titleFont.CreateFont())
+                using (Font f = titleFont.CreateFont(g))
                 {
                     SizeF titleSize = g.MeasureString(title, f);
 
@@ -524,7 +524,7 @@ namespace Pybrary.Plot
 
                 // calculate label and tick mark intervals
                 using (Brush br = labelFont.CreateBrush())
-                using (Font f = labelFont.CreateFont())
+                using (Font f = labelFont.CreateFont(g))
                 using (Pen p = tickPen.CreatePen())
                 {
                     foreach (double v in GenerateTickLocations(maxIntervals))
@@ -570,7 +570,7 @@ namespace Pybrary.Plot
                 int end = (int)Math.Ceiling(Math.Log10(ScaleMaximum));
 
                 using (Brush br = labelFont.CreateBrush())
-                using (Font f = labelFont.CreateFont())
+                using (Font f = labelFont.CreateFont(g))
                 using (Pen p = tickPen.CreatePen())
                 using (Pen p2 = gridlinePen.CreatePen())
                 {
@@ -681,7 +681,7 @@ namespace Pybrary.Plot
             if (title != null)
             {
                 // title
-                using (Font f = titleFont.CreateFont())
+                using (Font f = titleFont.CreateFont(g))
                     height += g.MeasureString(title, f).Height;
 
                 // Some padding between title and labels
@@ -689,7 +689,7 @@ namespace Pybrary.Plot
             }
 
             // label height
-            using (Font f = labelFont.CreateFont())
+            using (Font f = labelFont.CreateFont(g))
             {
                 double max = Math.Pow(10, Math.Floor(Math.Log10(ScaleMaximum)));
                 height += g.MeasureString(FormatLabel(max), f).Height;
@@ -713,7 +713,7 @@ namespace Pybrary.Plot
             if (title != null)
             {
                 using (Brush br = titleFont.CreateBrush())
-                using (Font f = titleFont.CreateFont())
+                using (Font f = titleFont.CreateFont(g))
                 {
                     SizeF titleSize = g.MeasureString(title, f);
                     g.DrawString(title, f, br, area.Center.X - (titleSize.Width / 2), area.BottomRight.Y - titleSize.Height);
@@ -726,7 +726,7 @@ namespace Pybrary.Plot
 
                 // calculate label and tick mark intervals
                 using (Brush br = labelFont.CreateBrush())
-                using (Font f = labelFont.CreateFont())
+                using (Font f = labelFont.CreateFont(g))
                 using (Pen p = tickPen.CreatePen())
                 {
                     foreach (double v in GenerateTickLocations(maxIntervals))
@@ -764,7 +764,7 @@ namespace Pybrary.Plot
                 int end = (int)Math.Ceiling(Math.Log10(ScaleMaximum));
 
                 using (Brush br = labelFont.CreateBrush())
-                using (Font f = labelFont.CreateFont())
+                using (Font f = labelFont.CreateFont(g))
                 using (Pen p = tickPen.CreatePen())
                 using (Pen p2 = gridlinePen.CreatePen())
                 {
