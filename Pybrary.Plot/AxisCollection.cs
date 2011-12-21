@@ -1,7 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Text;
+using System.Collections.ObjectModel;
 using System.Drawing;
 
 namespace Pybrary.Plot
@@ -132,6 +132,16 @@ namespace Pybrary.Plot
             AxisCollectionChangedHandler tmp = OnAxisCollectionChanged;
             if (tmp != null)
                 tmp();
+        }
+
+        public ReadOnlyCollection<NumericYAxis> LeftAxes
+        {
+            get { return leftAxes.AsReadOnly(); }
+        }
+
+        public ReadOnlyCollection<NumericYAxis> RightAxes
+        {
+            get { return rightAxes.AsReadOnly(); }
         }
     }
 }
