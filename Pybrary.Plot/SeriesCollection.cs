@@ -39,10 +39,18 @@ namespace Pybrary.Plot
             }
             set
             {
-                if (seriesByName.ContainsKey(name))
-                    value.OnSeriesChanged -= seriesChangedHandler;
-                seriesByName[name] = value;
-                value.OnSeriesChanged += seriesChangedHandler;
+                Series previousSeries;
+                if (seriesByName.TryGetValue(name, out previousSeries))
+                    previousSeries.OnSeriesChanged -= seriesChangedHandler;
+                if (value == null)
+                {
+                    seriesByName.Remove(name);
+                }
+                else
+                {
+                    seriesByName[name] = value;
+                    value.OnSeriesChanged += seriesChangedHandler;
+                }
                 raiseChanged();
             }
         }
